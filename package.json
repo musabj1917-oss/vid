@@ -1,0 +1,36 @@
+{
+  "name": "vidagents",
+  "version": "1.0.0",
+  "description": "Autonomous scheduled short-form video creation and social media uploading system",
+  "main": "runner.js",
+  "scripts": {
+    "start": "node runner.js",
+    "ideas": "python scripts/fetch_web_ideas.py --list",
+    "ideas:refresh": "python scripts/fetch_web_ideas.py --refresh --list",
+    "ideas:next": "python scripts/fetch_web_ideas.py",
+    "schedule": "node scheduler.js",
+    "schedule:daemon": "./scripts/daemon_ctl.sh start",
+    "daemon:status": "./scripts/daemon_ctl.sh status",
+    "daemon:stop": "./scripts/daemon_ctl.sh stop",
+    "daemon:logs": "./scripts/daemon_ctl.sh logs",
+    "render": "cd video-engine && npx remotion render MainVideo ../.pipeline/output/final.mp4",
+    "render:remotion": "cd video-engine && npx remotion render MainVideo ../.pipeline/output/final.mp4",
+    "review": "python scripts/review_video.py",
+    "upload": "python scripts/upload.py"
+  },
+  "keywords": [
+    "video",
+    "automation",
+    "subagents",
+    "social-media",
+    "shorts",
+    "reels",
+    "tiktok"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^18.0.9",
+    "node-cron": "^4.6.0"
+  }
+}
