@@ -34,12 +34,22 @@ AUDIO_FILE = ROOT_DIR / "video-engine" / "public" / "audio.mp3"
 if not AUDIO_FILE.exists():
     AUDIO_FILE = PIPELINE_DIR / "audio.mp3"
 
-FONT_SANS_BOLD = "/data/data/com.termux/files/usr/share/fonts/TTF/DejaVuSans-Bold.ttf"
-FONT_MONO_BOLD = "/data/data/com.termux/files/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf"
-if not os.path.exists(FONT_SANS_BOLD):
-    FONT_SANS_BOLD = "/system/fonts/Roboto-Regular.ttf"
-if not os.path.exists(FONT_MONO_BOLD):
-    FONT_MONO_BOLD = FONT_SANS_BOLD
+FONT_CANDIDATES_SANS = [
+    "/data/data/com.termux/files/usr/share/fonts/TTF/DejaVuSans-Bold.ttf",
+    "/system/fonts/Roboto-Regular.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    "/usr/share/fonts/TTF/DejaVuSans-Bold.ttf",
+]
+FONT_CANDIDATES_MONO = [
+    "/data/data/com.termux/files/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf",
+    "/system/fonts/Roboto-Regular.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
+    "/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf",
+]
+FONT_SANS_BOLD = next((p for p in FONT_CANDIDATES_SANS if os.path.exists(p)), None)
+FONT_MONO_BOLD = next((p for p in FONT_CANDIDATES_MONO if os.path.exists(p)), FONT_SANS_BOLD)
+if FONT_SANS_BOLD is None:
+    raise FileNotFoundError("No usable bold font found. Install fonts-dejavu or set FONT_SANS_BOLD.")
 
 font_hud_tab = ImageFont.truetype(FONT_MONO_BOLD, 18)
 font_hud_label = ImageFont.truetype(FONT_MONO_BOLD, 22)
