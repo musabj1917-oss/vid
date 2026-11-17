@@ -1,0 +1,56 @@
+name: Video Pipeline (Cloud)
+
+# Runs automatically twice a day + on demand.
+# Times are UTC. Addis Ababa is UTC+3, so:
+#   09:30 UTC = 12:30 EAT   (matches your old 12:30 PM phone schedule)
+#   16:30 UTC = 19:30 EAT   (matches your old 7:30 PM phone schedule)
+on:
+  schedule:
+    - cron: "30 9 * * *"
+    - cron: "30 16 * * *"
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: "Custom topic (optional)"
+        required: false
+        default: ""
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system deps (ffmpeg + fonts)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python deps
+        run: pip install Pillow
+
+      - name: Run cloud pipeline (topic -> render -> review -> Supabase)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          SUPABASE_BUCKET: ${{ secrets.SUPABASE_BUCKET }}
+        run: |
+          if [ -n "${{ inputs.topic }}" ]; then
+            python3 scripts/cloud_pipeline.py --topic "${{ inputs.topic }}"
+          else
+            python3 scripts/cloud_pipeline.py
+          fi
+
+      - name: Upload video artifact (always kept, even without Supabase)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-video-${{ github.run_id }}
+          path: .pipeline/output/final.mp4
+          if-no-files-found: warn
+          retention-days: 30
