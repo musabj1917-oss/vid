@@ -3,3 +3,9 @@ node_modules/
 __pycache__/
 *.pyc
 .env
+inspiration/*.mp4
+inspiration/*.mov
+inspiration/*.webm
+inspiration/analysis/frames/
+inspiration/analysis/*.wav
+*.wav
