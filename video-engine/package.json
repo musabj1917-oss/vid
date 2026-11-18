@@ -1,19 +1,31 @@
 {
   "name": "video-engine",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.1.0",
+  "description": "Remotion project: legacy MainVideo plus the Inspired3D (Three.js) composition",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "studio": "remotion studio src/index.ts",
+    "stills": "node scripts/stills.mjs",
+    "render3d": "node scripts/render3d.mjs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@react-three/fiber": "^9.1.2",
+    "@remotion/bundler": "^4.0.541",
     "@remotion/cli": "^4.0.541",
+    "@remotion/google-fonts": "^4.0.541",
+    "@remotion/renderer": "^4.0.541",
+    "@remotion/three": "^4.0.541",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "remotion": "^4.0.541"
+    "remotion": "^4.0.541",
+    "three": "0.175.0"
+  },
+  "devDependencies": {
+    "@types/three": "0.175.0"
   }
 }
