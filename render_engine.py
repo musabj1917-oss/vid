@@ -162,37 +162,42 @@ def draw_iso_callout(d, x_3d, y_3d, z_3d, badge_x, badge_y, text, accent_color,
     d.text((badge_x + 16, badge_y + 10), text, font=font_callout_txt, fill=(255, 255, 255, 255))
 
 def draw_hud_tabs(d, active_idx, scene_tag):
-    """Top dynamic HUD tab bar (y: 110 to 195) that changes with every scene."""
-    # Background glass container
-    d.rounded_rectangle([60, 110, 1020, 195], radius=16, fill=(13, 17, 28, 235), outline=(0, 242, 254, 70), width=2)
+    """Top dynamic telemetry HUD pill matching inspiration video."""
+    pill_w, pill_h = 940, 64
+    x1, y1 = (W - pill_w) // 2, 85
+    x2, y2 = x1 + pill_w, y1 + pill_h
+
+    # Translucent glass pill
+    d.rounded_rectangle([x1, y1, x2, y2], radius=32, fill=(12, 17, 28, 220), outline=(255, 255, 255, 30), width=1)
 
     # Live Status Dot & Scene Tag
     accent = C_AMBER if active_idx in [1, 3, 5, 7] else (C_RED if active_idx in [0, 2] else C_CYAN)
-    d.ellipse([92, 144, 106, 158], fill=accent)
-    d.ellipse([88, 140, 110, 162], outline=accent, width=1)
-
-    tag_text = f"PIPELINE OS // {scene_tag}"
-    d.text((124, 138), tag_text, font=font_hud_label, fill=(241, 245, 249, 255))
+    d.ellipse([x1 + 24, y1 + 25, x1 + 38, y1 + 39], fill=accent)
+    d.text((x1 + 50, y1 + 20), f"• PIPELINE // {scene_tag}", font=font_hud_label, fill=(241, 245, 249, 240))
 
     # 11 Micro Step Indicators
     total_steps = 11
-    start_x = 680
-    step_w = 26
-    step_gap = 4
+    step_r = 13
+    step_gap = 8
+    start_x = x2 - total_steps * (step_r * 2 + step_gap) - 15
+
     for i in range(total_steps):
-        sx = start_x + i * (step_w + step_gap)
+        sx = start_x + i * (step_r * 2 + step_gap) + step_r
+        sy = y1 + pill_h // 2
         is_cur = (i == active_idx)
-        c_fill = accent if is_cur else (30, 41, 59, 140)
-        c_line = accent if is_cur else (71, 85, 105, 100)
-        d.rounded_rectangle([sx, 142, sx + step_w, 164], radius=4, fill=c_fill, outline=c_line, width=1)
         if is_cur:
-            txt_num = str(i + 1)
-            d.text((sx + 5, 144), txt_num, font=font_hud_tab, fill=(10, 12, 18, 255))
+            d.ellipse([sx - step_r, sy - step_r, sx + step_r, sy + step_r], fill=C_AMBER)
+            d.text((sx - 5, sy - 9), str(i + 1), font=font_hud_tab, fill=(10, 14, 22, 255))
+        else:
+            d.ellipse([sx - step_r, sy - step_r, sx + step_r, sy + step_r], fill=(22, 30, 46, 200), outline=(71, 85, 105, 120), width=1)
+            d.text((sx - 5, sy - 9), str(i + 1), font=font_hud_tab, fill=(148, 163, 184, 180))
 
 def draw_bottom_captions(d, t, timings_data):
     """
-    Renders 3-5 words at a time, big, bottom-center, with the active spoken word highlighted.
-    Completely removes the paragraph box!
+    Kinetic lower-third captions matching the inspiration video:
+    - Frosted dark pill hugging 2-4 words
+    - Spoken word highlighted with thick gold underline
+    - Lower third safe zone (y ≈ 1620)
     """
     if not timings_data:
         return
@@ -204,13 +209,11 @@ def draw_bottom_captions(d, t, timings_data):
             active_chunk = chunk
             break
         elif t < chunk["start"]:
-            # If in brief gap between chunks, retain previous or preview next
             if active_chunk is None and t > chunk["start"] - 0.2:
                 active_chunk = chunk
                 break
 
     if not active_chunk:
-        # Fallback to last chunk if near the end
         if t >= timings_data[-1]["start"]:
             active_chunk = timings_data[-1]
         else:
@@ -219,7 +222,6 @@ def draw_bottom_captions(d, t, timings_data):
     words = active_chunk["words"]
     word_starts = active_chunk.get("word_starts", [])
 
-    # Measure words and spacing
     space_w = font_caption.getbbox(" ")[2] - font_caption.getbbox(" ")[0]
     word_metrics = []
     total_w = 0
@@ -230,31 +232,33 @@ def draw_bottom_captions(d, t, timings_data):
         total_w += w_w + space_w
     total_w -= space_w
 
-    start_x = (W - total_w) // 2
-    y_pos = 1630
+    pad_x, pad_y = 28, 16
+    pill_w = total_w + pad_x * 2
+    pill_h = 58 + pad_y * 2
+    pill_x1 = (W - pill_w) // 2
+    pill_y1 = 1620
+    pill_x2 = pill_x1 + pill_w
+    pill_y2 = pill_y1 + pill_h
 
-    # Determine which word is currently spoken
+    # Translucent dark pill hugging text
+    d.rounded_rectangle([pill_x1, pill_y1, pill_x2, pill_y2], radius=22,
+                        fill=(10, 15, 25, 225), outline=(255, 255, 255, 30), width=1)
+
     active_word_idx = -1
     for i, w_start in enumerate(word_starts):
         if t >= w_start:
             active_word_idx = i
 
-    cur_x = start_x
+    cur_x = pill_x1 + pad_x
+    text_y = pill_y1 + pad_y + 4
+
     for i, (w, w_w) in enumerate(word_metrics):
         is_active = (i == active_word_idx)
         if is_active:
-            # Highlighted in glowing warm gold with contrast dropshadow
-            for dx, dy in [(-3,0),(3,0),(0,-3),(0,3),(-2,-2),(2,2)]:
-                d.text((cur_x + dx, y_pos + dy), w, font=font_caption, fill=(0, 0, 0, 240))
-            d.text((cur_x, y_pos), w, font=font_caption, fill=C_GOLD)
-            # Active glowing underline pill
-            d.rounded_rectangle([cur_x - 2, y_pos + 56, cur_x + w_w + 2, y_pos + 61],
-                                radius=2, fill=C_AMBER)
+            d.text((cur_x, text_y), w, font=font_caption, fill=C_WHITE)
+            d.line([(cur_x, text_y + 50), (cur_x + w_w, text_y + 50)], fill=C_GOLD, width=4)
         else:
-            # Inactive word in crisp white with subtle shadow
-            d.text((cur_x + 2, y_pos + 2), w, font=font_caption, fill=(0, 0, 0, 180))
-            d.text((cur_x, y_pos), w, font=font_caption, fill=C_WHITE)
-
+            d.text((cur_x, text_y), w, font=font_caption, fill=(160, 174, 192, 230))
         cur_x += w_w + space_w
 
 def render_frame_image(frame_idx, total_frames, script_data, total_duration, timed_scenes, timings_data):
@@ -789,8 +793,10 @@ def render_final(output_path=None):
         "-i", "-",
         "-i", str(AUDIO_FILE),
         "-c:v", "libx264",
-        "-preset", "veryfast",
+        "-crf", "19",
+        "-preset", "medium",
         "-pix_fmt", "yuv420p",
+        "-af", "loudnorm=I=-16:TP=-1.5:LRA=11",
         "-c:a", "aac",
         "-b:a", "192k",
         "-shortest",
