@@ -1,0 +1,44 @@
+{
+  "file": "/data/data/com.termux/files/home/vidagents/inspiration/sample.mp4",
+  "size_mb": 15.66,
+  "width": 720,
+  "height": 1280,
+  "video_codec": "h264",
+  "fps_raw": "30/1",
+  "duration_s": 91.9,
+  "audio_codec": "aac",
+  "audio_sample_rate": "48000",
+  "audio_channels": 2,
+  "fps": 30.0,
+  "frames_extracted": 92,
+  "palette": [
+    {
+      "hex": "#15171A",
+      "pct": 4.3
+    },
+    {
+      "hex": "#1A1B1F",
+      "pct": 4.2
+    },
+    {
+      "hex": "#142032",
+      "pct": 4.1
+    },
+    {
+      "hex": "#060911",
+      "pct": 4.0
+    },
+    {
+      "hex": "#303030",
+      "pct": 3.2
+    },
+    {
+      "hex": "#292D36",
+      "pct": 2.7
+    }
+  ],
+  "audio": {
+    "mean_volume_db": "-17.0 dB",
+    "max_volume_db": "-2.5 dB"
+  }
+}
